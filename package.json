@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "docs:sync": "npx rimraf src/content/docs && git clone https://github.com/FPVirtual/documentacion.git src/content/docs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
