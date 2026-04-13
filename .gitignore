@@ -21,4 +21,4 @@ pnpm-debug.log*
 .DS_Store
 
 # docs folder
-/src/assets/docs/
+/src/content/docs/
