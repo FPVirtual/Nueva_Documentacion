@@ -1,6 +1,10 @@
 services:
   starlight-docs:
-    build: .
+    build:
+      context: .
+      args:
+        # Pasa la variable del host al contenedor al construir
+        - URL_REPO_DOCS=${URL_REPO_DOCS}
     container_name: starlight
     restart: unless-stopped
     ports:
