@@ -1,16 +1,18 @@
-# Starlight Starter Kit: Basics
+# Proyecto de documentacion
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Se usa Astro + Starlight
 
+## Configuracion previa
+
+Antes de levantar el proyecto, crea un archivo `.env` en la raiz con la URL del repositorio de docs:
+
+```env
+URL_REPO_DOCS=https://github.com/organizacion/repositorio-docs.git
 ```
-npm create astro@latest -- --template starlight
-```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Esta variable se usa en la sincronizacion de contenido (`npm run docs:sync`).
 
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Estructura básica
 
 ```
 .
@@ -24,26 +26,23 @@ Inside of your Astro + Starlight project, you'll see the following folders and f
 ├── package.json
 └── tsconfig.json
 ```
+## Comandos
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Todos los comandos se ejecutan desde la raiz del proyecto:
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+| Comando                   | Accion                                                     |
+| :------------------------ | :--------------------------------------------------------- |
+| `npm install`             | Instala dependencias                                       |
+| `npm run docs:sync`       | Sincroniza `src/content/docs` desde el repo configurado    |
+| `npm run dev`             | Inicia servidor local en `localhost:4321`                  |
+| `npm run build`           | Genera build de produccion en `./dist/`                    |
+| `npm run preview`         | Previsualiza el build localmente                           |
+| `npm run astro ...`       | Ejecuta comandos CLI de Astro (`astro add`, `astro check`) |
+| `npm run astro -- --help` | Muestra ayuda de Astro CLI                                 |
 
-Static assets, like favicons, can be placed in the `public/` directory.
+Para desarrollo local, el flujo recomendado es:
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+1. `npm install`
+2. Configurar `.env` con `URL_REPO_DOCS`
+3. `npm run docs:sync`
+4. `npm run dev`
