@@ -1,6 +1,6 @@
+import "dotenv/config";
 import cp from "node:child_process";
 import fs from "node:fs";
-import "dotenv/config";
 
 const repoUrl = process.env.URL_REPO_DOCS
 
