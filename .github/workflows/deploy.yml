@@ -3,6 +3,8 @@ name: Deploy Local Agent
 on:
   push:
     branches: [ main ]
+  repository_dispatch:
+    types: [docs-updated]
   workflow_dispatch:
 
 jobs:
