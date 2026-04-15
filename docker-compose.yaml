@@ -3,8 +3,7 @@ services:
     build:
       context: .
       args:
-        # Pasa la variable del host al contenedor al construir
-        - URL_REPO_DOCS=${URL_REPO_DOCS}
+        - URL_REPO_DOCS=${URL_REPO_DOCS} # Pasa la variable del host al contenedor al construir
     container_name: starlight
     restart: unless-stopped
     ports:
