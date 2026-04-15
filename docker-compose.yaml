@@ -3,8 +3,10 @@ services:
     build:
       context: .
       args:
-        - URL_REPO_DOCS=${URL_REPO_DOCS} # Pasa la variable del host al contenedor al construir
-    container_name: starlight
+        URL_REPO_DOCS: ${URL_REPO_DOCS}
+        LOGO_NAME: ${LOGO_NAME:-logo.png}
+        STYLESHEET_NAME: ${STYLESHEET_NAME:-style.css}
+        SITE_TITLE: ${SITE_TITLE:-Documentacion}
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${HOST_PORT:-8080}:8080"

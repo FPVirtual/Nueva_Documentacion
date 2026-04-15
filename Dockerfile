@@ -11,8 +11,16 @@ COPY . .
 ARG URL_REPO_DOCS
 ENV URL_REPO_DOCS=$URL_REPO_DOCS
 
-# Sincroniza la documentación
-RUN npm run docs:sync
+# Argumentos para personalizar la instancia de docs
+ARG LOGO_NAME
+ENV LOGO_NAME=$LOGO_NAME
+
+ARG STYLESHEET_NAME
+ENV STYLESHEET_NAME=$STYLESHEET_NAME
+
+ARG SITE_TITLE
+ENV SITE_TITLE=$SITE_TITLE
+
 # Construye la aplicación
 RUN npm run build
 
