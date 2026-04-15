@@ -4,8 +4,6 @@ services:
       context: .
       args:
         URL_REPO_DOCS: ${URL_REPO_DOCS}
-        LOGO_NAME: ${LOGO_NAME:-logo.png}
-        STYLESHEET_NAME: ${STYLESHEET_NAME:-style.css}
         SITE_TITLE: ${SITE_TITLE:-Documentacion}
     restart: unless-stopped
     ports:

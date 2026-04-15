@@ -4,16 +4,12 @@ Se usa Astro + Starlight
 
 ## Configuracion previa
 
-### Una sola documentacion (local o una instancia)
-
 Antes de levantar el proyecto, crea un archivo `.env` en la raiz con la URL del repositorio de docs:
 
 ```env
 URL_REPO_DOCS=https://github.com/organizacion/repositorio-docs.git
 HOST_PORT=8080
 SITE_TITLE=Documentacion
-LOGO_NAME=logo.png
-STYLESHEET_NAME=style.css
 ```
 
 Si el repositorio es privado la URL se debera construir añadiendo un `Personal Access Token` con permiso de `repo` de esta forma:  
@@ -22,23 +18,13 @@ Si el repositorio es privado la URL se debera construir añadiendo un `Personal 
 https://ghp_TokenSecretoAqui@github.com/organizacion/repositorio-docs.git
 ```
 
-### Multiples documentaciones (varias instancias)
+## Personalizacion
 
-Para correr varias documentaciones en paralelo, usa el archivo `docker-compose.multi-docs.yaml` y configura cada servicio dentro de ese archivo (repo, logo, stylesheet, titulo y puerto).
+Para personalizar la instancia:
 
-## Estructura básica
+- Reemplaza el logo en `src/theme/logos` por un archivo con el mismo nombre que el original.
+- Modifica los estilos en `src/theme/styles/style.css`.
 
-```text
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
 
 ## Comandos
 
