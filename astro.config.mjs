@@ -17,7 +17,7 @@ export default defineConfig({
       logo: {
         src: `./src/theme/logos/logo.png`,
       },
-      customCss: [`./src/theme/styles/custom.css`],
+      customCss: [`./src/theme/styles/style.css`],
     }),
   ],
 });
