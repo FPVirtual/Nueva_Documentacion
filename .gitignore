@@ -21,4 +21,5 @@ pnpm-debug.log*
 .DS_Store
 
 # docs folder
-/src/content/docs/
+/src/content/docs/*
+!/src/content/docs/.gitkeep
