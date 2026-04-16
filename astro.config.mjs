@@ -9,8 +9,8 @@ const repoUrl = process.env.URL_REPO_DOCS ?? "https://github.com/withastro/starl
 const siteTitle = process.env.SITE_TITLE ?? "Docs";
 
 // Rutas de archivos de personalizacion:
-const docsLogoPath = "./src/docs/theme/logo.png";
-const docsCustomCssPath = "./src/docs/theme/style.css";
+const docsLogoPath = "./src/content/docs/theme/logo.png";
+const docsCustomCssPath = "./src/content/docs/theme/style.css";
 
 // Verificar si existen los archivos en el repositorio, si no, usar los de por defecto:
 const logoSrc = fs.existsSync(docsLogoPath) ? docsLogoPath : "./default/logo.png"
