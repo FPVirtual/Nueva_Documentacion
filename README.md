@@ -20,11 +20,12 @@ https://ghp_TokenSecretoAqui@github.com/organizacion/repositorio-docs.git
 
 ## Personalizacion
 
-Para personalizar la instancia:
+Para personalizar la instancia se debe incluir en el repositorio de la documentación:
 
-- Reemplaza el logo en `src/theme/logos` por un archivo con el mismo nombre que el original.
-- Modifica los estilos en `src/theme/styles/style.css`.
+- `theme/logo.png`: para cambiar el logo
+- `theme/style.css`: para personalizar los estilos. El ejemplo del archivo CSS con las variables a cambiar esta en `default/style.css`
 
+Si no se incluye alguno de estos archivos se usaran los de por defecto, ubicados en: `default/`
 
 ## Comandos
 
@@ -46,6 +47,5 @@ Para desarrollo local, el flujo recomendado es:
 
 1. `npm install`
 2. Configurar `.env`
-3. `npm run dev`
-
-`predev` ejecuta automaticamente la sincronizacion.
+3. `npm run docs:sync`
+4. `npm run dev`

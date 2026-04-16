@@ -2,10 +2,19 @@
 import "dotenv/config";
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import fs from "node:fs"
 
-// Variables env:
-const repoUrl = process.env.URL_REPO_DOCS ?? "";
-const siteTitle = process.env.SITE_TITLE ?? "Documentacion";
+// Variables de entorno:
+const repoUrl = process.env.URL_REPO_DOCS ?? "https://github.com/withastro/starlight";
+const siteTitle = process.env.SITE_TITLE ?? "Docs";
+
+// Rutas de archivos de personalizacion:
+const docsLogoPath = "./src/docs/theme/logo.png";
+const docsCustomCssPath = "./src/docs/theme/style.css";
+
+// Verificar si existen los archivos en el repositorio, si no, usar los de por defecto:
+const logoSrc = fs.existsSync(docsLogoPath) ? docsLogoPath : "./default/logo.png"
+const customCss = fs.existsSync(docsCustomCssPath) ? docsCustomCssPath : "./default/style.css"
 
 // Configuracion:
 // https://astro.build/config
@@ -15,9 +24,9 @@ export default defineConfig({
       title: siteTitle,
       social: [{ icon: "github", label: "GitHub", href: repoUrl }],
       logo: {
-        src: `./src/theme/logos/logo.png`,
+        src: logoSrc,
       },
-      customCss: [`./src/theme/styles/style.css`],
+      customCss: [customCss],
     }),
   ],
 });

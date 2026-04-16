@@ -42,4 +42,6 @@ try {
 } catch (error) {
   console.error(`❌ Error al sincronizar la documentación:\n${error.message}`);
   process.exit(1);
+} finally {
+  fs.writeFileSync("src/content/docs/.gitkeep", "");
 }
