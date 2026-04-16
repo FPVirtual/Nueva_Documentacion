@@ -3,7 +3,6 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "predev": "npm run docs:sync",
     "dev": "astro dev",
     "start": "astro dev",
     "docs:sync": "node scripts/sync-docs.js",
