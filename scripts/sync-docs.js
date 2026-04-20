@@ -1,47 +1,122 @@
 import "dotenv/config";
 import cp from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 
+// Env
 const repoUrl = process.env.URL_REPO_DOCS;
+const docsDir = path.resolve("src/content/docs");
 
-if (!repoUrl) {
-  console.error("Variable de entorno URL_REPO_DOCS no definida");
-  process.exit(1);
+// Argumentos
+const force = process.argv.includes("--force") || process.argv.includes("-f");
+
+// Main
+main();
+
+function main() {
+  if (!repoUrl) {
+    console.error("Variable de entorno URL_REPO_DOCS no definida");
+    process.exit(1);
+  }
+
+  try {
+    if (isGitRepository(docsDir) && !force) {
+      const currentOriginUrl = getCurrentOriginUrl();
+
+      if (!currentOriginUrl) {
+        console.log("No se detectó remoto origin, se volverá a clonar.");
+        resetDocsDirectory();
+        cloneDocs();
+      } else if (currentOriginUrl === repoUrl) {
+        console.log(
+          "El directorio de documentación ya existe y apunta al mismo repositorio, intentando sincronizar...",
+        );
+        pullDocs();
+      } else {
+        console.log(
+          "La URL del repositorio cambió. Se eliminará y clonará nuevamente.",
+        );
+        resetDocsDirectory();
+        cloneDocs();
+      }
+    } else {
+      console.log("Sincronizando repositorio de documentación...");
+      resetDocsDirectory();
+      cloneDocs();
+    }
+
+    console.log("Documentación sincronizada correctamente");
+  } catch (error) {
+    const mensaje = error.message;
+    console.error(`❌ Error al sincronizar la documentación:\n${mensaje}`);
+    process.exit(1);
+  } finally {
+    fs.writeFileSync("src/content/docs/.gitkeep", "");
+  }
 }
 
-try {
-  // Eliminar la carpeta de documentación anterior
-  console.log("Eliminando carpeta de documentación anterior...");
-  fs.rmSync("src/content/docs", { recursive: true, force: true });
+// Funciones
+function isGitRepository(directory) {
+  return fs.existsSync(path.join(directory, ".git"));
+}
 
-  // Clonar el repositorio de documentación
-  console.log("Clonando repositorio de documentación...");
+function getCurrentOriginUrl() {
   const resultado = cp.spawnSync(
     "git",
-    ["clone", repoUrl, "src/content/docs"],
+    ["config", "--get", "remote.origin.url"],
     {
       encoding: "utf-8",
+      cwd: docsDir,
     },
   );
-  // Error al ejecutar el comando Git
-  if (resultado.error) {
-    const mensaje = resultado.error.message;
-    throw new Error(`Fallo en el sistema al ejecutar Git -> ${mensaje}`);
+
+  if (resultado.error || resultado.status !== 0) {
+    return null;
   }
-  // Error ejecutando Git
+
+  return resultado.stdout.trim();
+}
+
+function resetDocsDirectory() {
+  fs.rmSync(docsDir, { recursive: true, force: true });
+}
+
+function pullDocs() {
+  const resultado = cp.spawnSync("git", ["pull", "--ff-only"], {
+    encoding: "utf-8",
+    cwd: docsDir,
+  });
+
+  if (resultado.error) {
+    throw new Error(
+      `Fallo en el sistema al ejecutar Git -> ${resultado.error.message}`,
+    );
+  }
+
   if (resultado.status !== 0) {
     const mensaje = resultado.stderr || resultado.stdout || "Error desconocido";
+    throw new Error(
+      `El proceso de sincronización falló con codigo ${resultado.status}\n---\n${mensaje}---`,
+    );
+  }
+}
 
+function cloneDocs() {
+  console.log("Clonando repositorio de documentación...");
+  const resultado = cp.spawnSync("git", ["clone", repoUrl, docsDir], {
+    encoding: "utf-8",
+  });
+
+  if (resultado.error) {
+    throw new Error(
+      `Fallo en el sistema al ejecutar Git -> ${resultado.error.message}`,
+    );
+  }
+
+  if (resultado.status !== 0) {
+    const mensaje = resultado.stderr || resultado.stdout || "Error desconocido";
     throw new Error(
       `El proceso de clonado falló con codigo ${resultado.status}\n---\n${mensaje}---`,
     );
   }
-
-  // Proceso de sincronización exitoso
-  console.log("Documentación sincronizada correctamente");
-} catch (error) {
-  console.error(`❌ Error al sincronizar la documentación:\n${error.message}`);
-  process.exit(1);
-} finally {
-  fs.writeFileSync("src/content/docs/.gitkeep", "");
 }
