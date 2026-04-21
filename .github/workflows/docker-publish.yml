@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - ci/static
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,5 +28,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:static
-            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:static-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:latest
+            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:latest-${{ github.sha }}
