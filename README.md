@@ -6,13 +6,7 @@ Generador de sitios de documentación construido con [Astro](https://astro.build
 
 ### Configuración previa
 
-Antes de levantar el proyecto, crea un archivo `.env` en la raíz con la configuración básica:
-
-```env
-URL_REPO_DOCS=https://github.com/organizacion/repositorio-docs.git
-HOST_PORT=8080
-SITE_TITLE=Documentacion
-```
+Antes de levantar el proyecto, crea un archivo `.env` en la raíz con la configuración básica definida `.env.example`
 
 > **Nota:** Si el repositorio es privado, la URL se debe construir añadiendo un *Personal Access Token* (PAT) con permisos de lectura de la siguiente forma:
 > `https://<TOKEN_AQUI>@github.com/organizacion/repositorio-docs.git`
@@ -39,19 +33,25 @@ Todos los comandos se ejecutan desde la raíz del proyecto:
 | `npm run preview`         | Previsualiza el build localmente                           |
 | `npm run astro ...`       | Ejecuta comandos CLI de Astro (`astro add`, `astro check`) |
 
-## Uso con Docker
+## Despliegue con Docker
+
+Ejemplo:
 
 ```yaml
 services:
   starlight-docs:
-    image: rsvisu/fpvirtual-documentacion:static
-    restart: unless-stopped
+    image: rsvisu/fpvirtual-documentacion:latest
+    restart: no
     ports:
-      - "8080:8080"
+      - "80:8080"
     environment:
       - URL_REPO_DOCS=https://github.com/organizacion/repositorio-docs.git
+      - BRANCH_REPO_DOCS=main
+      - PATH_REPO_DOCS=src/docs
       - SITE_TITLE=Documentacion
 ```
+
+Todas las variables de entorno disponibles están definidas en `.env.example`
 
 ## Personalización
 
