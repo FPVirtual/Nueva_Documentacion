@@ -2,9 +2,11 @@ services:
   starlight-docs:
     build:
       context: .
-      args:
-        URL_REPO_DOCS: ${URL_REPO_DOCS}
-        SITE_TITLE: ${SITE_TITLE:-Documentacion}
+    environment:
+      - URL_REPO_DOCS=${URL_REPO_DOCS}
+      - BRANCH_REPO_DOCS=${BRANCH_REPO_DOCS:-main}
+      - PATH_REPO_DOCS=${PATH_REPO_DOCS:-}
+      - SITE_TITLE=${SITE_TITLE:-Documentacion}
     restart: "no"
     ports:
       - "${HOST_PORT:-8080}:8080"
