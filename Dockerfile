@@ -1,25 +1,24 @@
-### https://docs.astro.build/en/recipes/docker/#nginx
+# Usamos Node.js para tener el entorno de construcción y git
+FROM node:lts-slim
 
-# Paso 1: Construir la aplicación con Node.js
-FROM node:lts AS build
+# Instalar Nginx y Git (necesario para tu sync-docs.js)
+RUN apt-get update && \
+    apt-get install -y nginx git && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configurar el directorio de la aplicación
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
+
+# Copiar el código fuente y Nginx conf
 COPY . .
-
-# Argumento para la URL del repositorio de documentación
-ARG URL_REPO_DOCS
-ENV URL_REPO_DOCS=$URL_REPO_DOCS
-
-# Argumentos para personalizar la instancia de docs
-ARG SITE_TITLE
-ENV SITE_TITLE=$SITE_TITLE
-
-# Construye la aplicación
-RUN npm run build
-
-# Paso 2: Copiar dist y servir la aplicación con Nginx
-FROM nginx:alpine AS runtime
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 8080
+
+# Script de entrada para construir los docs al iniciar el contenedor y luego arrancar Nginx
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+EXPOSE 80
+
+# Al levantar el contenedor se ejecutará el build y luego Nginx
+ENTRYPOINT ["/app/entrypoint.sh"]
