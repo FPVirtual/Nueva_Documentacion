@@ -5,6 +5,6 @@ services:
       args:
         URL_REPO_DOCS: ${URL_REPO_DOCS}
         SITE_TITLE: ${SITE_TITLE:-Documentacion}
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "${HOST_PORT:-8080}:8080"
