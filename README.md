@@ -44,7 +44,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto:
 ```yaml
 services:
   starlight-docs:
-    image: rsvisu/fpvirtual-documentacion:latest
+    image: rsvisu/fpvirtual-documentacion:static
     restart: unless-stopped
     ports:
       - "4321:4321"
