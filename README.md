@@ -47,7 +47,7 @@ services:
     image: rsvisu/fpvirtual-documentacion:static
     restart: unless-stopped
     ports:
-      - "4321:4321"
+      - "8080:8080"
     environment:
       - URL_REPO_DOCS=https://github.com/organizacion/repositorio-docs.git
       - SITE_TITLE=Documentacion
