@@ -8,4 +8,5 @@ rm -rf /usr/share/nginx/html/*
 cp -r /app/dist/* /usr/share/nginx/html/
 
 echo "===> [entrypoint] Iniciando Nginx..."
+echo "===> [entrypoint] ¡Servidor listo exitosamente! La documentación ya está disponible en el puerto ${HOST_PORT:-por defecto}"
 exec nginx -g "daemon off;"
