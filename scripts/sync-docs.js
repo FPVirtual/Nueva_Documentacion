@@ -5,6 +5,9 @@ import path from "node:path";
 
 // Env
 const repoUrl = process.env.URL_REPO_DOCS;
+const repoBranch = process.env.BRANCH_REPO_DOCS || "main";
+const repoPath = process.env.PATH_REPO_DOCS || "";
+const gitDir = path.resolve("src/content/.docs_git");
 const docsDir = path.resolve("src/content/docs");
 
 // Argumentos
@@ -20,12 +23,12 @@ function main() {
   }
 
   try {
-    if (isGitRepository(docsDir) && !force) {
+    if (isGitRepository(gitDir) && !force) {
       const currentOriginUrl = getCurrentOriginUrl();
 
       if (!currentOriginUrl) {
         console.log("No se detectó remoto origin, se volverá a clonar.");
-        resetDocsDirectory();
+        resetGitDirectory();
         cloneDocs();
       } else if (currentOriginUrl === repoUrl) {
         console.log(
@@ -36,15 +39,16 @@ function main() {
         console.log(
           "La URL del repositorio cambió. Se eliminará y clonará nuevamente.",
         );
-        resetDocsDirectory();
+        resetGitDirectory();
         cloneDocs();
       }
     } else {
       console.log("Sincronizando repositorio de documentación...");
-      resetDocsDirectory();
+      resetGitDirectory();
       cloneDocs();
     }
 
+    copyToDocsDir();
     console.log("Documentación sincronizada correctamente");
   } catch (error) {
     const mensaje = error.message;
@@ -66,7 +70,7 @@ function getCurrentOriginUrl() {
     ["config", "--get", "remote.origin.url"],
     {
       encoding: "utf-8",
-      cwd: docsDir,
+      cwd: gitDir,
     },
   );
 
@@ -77,15 +81,19 @@ function getCurrentOriginUrl() {
   return resultado.stdout.trim();
 }
 
-function resetDocsDirectory() {
-  fs.rmSync(docsDir, { recursive: true, force: true });
+function resetGitDirectory() {
+  fs.rmSync(gitDir, { recursive: true, force: true });
 }
 
 function pullDocs() {
-  const resultado = cp.spawnSync("git", ["pull", "--ff-only"], {
-    encoding: "utf-8",
-    cwd: docsDir,
-  });
+  const resultado = cp.spawnSync(
+    "git",
+    ["pull", "origin", repoBranch, "--ff-only"],
+    {
+      encoding: "utf-8",
+      cwd: gitDir,
+    },
+  );
 
   if (resultado.error) {
     console.warn(
@@ -104,8 +112,15 @@ function pullDocs() {
 }
 
 function cloneDocs() {
-  console.log("Clonando repositorio de documentación...");
-  const resultado = cp.spawnSync("git", ["clone", repoUrl, docsDir], {
+  console.log(`Clonando repositorio de documentación (rama: ${repoBranch})...`);
+
+  const cloneArgs = ["clone", "-b", repoBranch, "--single-branch"];
+  if (repoPath) {
+    cloneArgs.push("--no-checkout", "--filter=blob:none");
+  }
+  cloneArgs.push(repoUrl, gitDir);
+
+  const resultado = cp.spawnSync("git", cloneArgs, {
     encoding: "utf-8",
   });
 
@@ -121,4 +136,34 @@ function cloneDocs() {
       `El proceso de clonado falló con codigo ${resultado.status}\n---\n${mensaje}---`,
     );
   }
+
+  if (repoPath) {
+    console.log(`Configurando directorio específico: ${repoPath}...`);
+    cp.spawnSync("git", ["sparse-checkout", "set", repoPath], { cwd: gitDir });
+    cp.spawnSync("git", ["checkout", repoBranch], { cwd: gitDir });
+  }
+}
+
+function copyToDocsDir() {
+  console.log("Copiando archivos a la carpeta de documentación...");
+
+  // Limpiar docsDir primero para evitar mezclar archivos viejos
+  fs.rmSync(docsDir, { recursive: true, force: true });
+  fs.mkdirSync(docsDir, { recursive: true });
+
+  const sourcePath = repoPath ? path.join(gitDir, repoPath) : gitDir;
+
+  if (!fs.existsSync(sourcePath)) {
+    throw new Error(
+      `La ruta especificada (${repoPath}) no existe en el repositorio.`,
+    );
+  }
+
+  fs.cpSync(sourcePath, docsDir, {
+    recursive: true,
+    filter: (src) => {
+      // Ignorar la carpeta .git del repositorio original si se copia todo
+      return path.basename(src) !== ".git";
+    },
+  });
 }

@@ -23,3 +23,4 @@ pnpm-debug.log*
 # docs folder
 /src/content/docs/*
 !/src/content/docs/.gitkeep
+/src/content/.docs_git
