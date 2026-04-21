@@ -1,7 +1,6 @@
-# Usamos Node.js para tener el entorno de construcción y git
-FROM node:lts-slim
+FROM node:lts
 
-# Instalar Nginx y Git (necesario para tu sync-docs.js)
+# Instalar Nginx y Git para servir los archivos estáticos y clonar el repositorio
 RUN apt-get update && \
     apt-get install -y nginx git && \
     rm -rf /var/lib/apt/lists/*
