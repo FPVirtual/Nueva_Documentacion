@@ -88,16 +88,18 @@ function pullDocs() {
   });
 
   if (resultado.error) {
-    throw new Error(
-      `Fallo en el sistema al ejecutar Git -> ${resultado.error.message}`,
+    console.warn(
+      `⚠️ Advertencia: Fallo en el sistema al ejecutar Git -> ${resultado.error.message}. Se continuará usando la versión local.`,
     );
+    return;
   }
 
   if (resultado.status !== 0) {
     const mensaje = resultado.stderr || resultado.stdout || "Error desconocido";
-    throw new Error(
-      `El proceso de sincronización falló con codigo ${resultado.status}\n---\n${mensaje}---`,
+    console.warn(
+      `⚠️ Advertencia: El proceso de sincronización falló (código ${resultado.status}). Es posible que no haya conexión a internet. Se continuará usando la versión local.\n---\n${mensaje.trim()}\n---`,
     );
+    return;
   }
 }
 
