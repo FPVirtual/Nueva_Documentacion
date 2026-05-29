@@ -35,7 +35,8 @@ Todos los comandos se ejecutan desde la raíz del proyecto:
 
 ## Despliegue con Docker
 
-Ejemplo:
+La forma recomendada de desplegar en producción es usando la **imagen ya publicada**, sin
+necesidad de clonar este repositorio. Basta con un `docker-compose.yaml` que la referencie:
 
 ```yaml
 services:
@@ -53,6 +54,12 @@ services:
 
 Todas las variables de entorno disponibles están definidas en `.env.example`
 
+> **Nota sobre los dos `docker-compose`:** El `docker-compose.yaml` incluido en este
+> repositorio es de **desarrollo**: usa `build: context: .` para construir la imagen
+> localmente a partir del código fuente, por lo que requiere tener el repositorio clonado.
+> Para **producción** se usa el ejemplo de arriba, que consume directamente la imagen
+> publicada en el registro.
+
 ## Redespliegue automático al actualizar la documentación
 
 > **Importante:** El contenedor sincroniza y compila la documentación desde `URL_REPO_DOCS`
@@ -61,31 +68,45 @@ Todas las variables de entorno disponibles están definidas en `.env.example`
 
 Esto implica que **un contenedor que ya está en ejecución no detecta los nuevos commits**
 del repositorio de contenido. Para que los cambios se publiquen, el contenedor debe
-**reiniciarse o recrearse**, de forma que vuelva a clonar el repositorio, sincronizar el
-contenido y recompilar el sitio.
+**reiniciarse o recrearse**, de forma que vuelva a sincronizar el contenido y recompilar el
+sitio.
 
-Para el despliegue en un servidor propio, el proyecto incluye el script `deploy.sh`, que
-automatiza este proceso:
+> **Nota:** Cuando solo cambia el *contenido* de la documentación **no es necesario reconstruir
+> la imagen**; basta con recrear el contenedor para que vuelva a sincronizar. Reconstruir la
+> imagen solo hace falta cuando cambia este proyecto (el "motor"), lo cual ya se publica
+> automáticamente con el workflow `.github/workflows/docker-publish.yml`.
 
-```bash
-git pull origin main             # Actualiza el "motor" (este proyecto)
-docker compose up -d --build     # Reconstruye y recrea el contenedor
-docker image prune -f            # Limpia imágenes huérfanas para no llenar el disco
-```
+### Cómo recrear el contenedor
 
-Al recrearse el contenedor, el `entrypoint.sh` vuelve a sincronizar y compilar el contenido,
-publicando así la última versión de la documentación.
+Según el modo de despliegue, hay dos formas de hacerlo:
 
-> **Nota:** Cuando solo cambia el *contenido* de la documentación no es imprescindible
-> reconstruir la imagen; basta con recrear el contenedor (`docker compose up -d
-> --force-recreate`) para que vuelva a sincronizar. Reconstruir la imagen solo hace falta
-> cuando cambia este proyecto (el "motor"), lo cual ya se publica automáticamente con el
-> workflow `.github/workflows/docker-publish.yml`.
+- **Producción (imagen publicada, sin clonar el repo):** se usa el `docker-compose.yaml` de
+  producción (el del ejemplo anterior) y se recrea el contenedor. El proyecto incluye el script
+  `redeploy.sh` para automatizarlo:
 
-Para automatizar esta publicación se debe añadir, **en el repositorio de la documentación**
-(no en este), un mecanismo que dispare el redespliegue del contenedor cada vez que se haga un
-commit. La implementación concreta **depende de la plataforma donde esté desplegado el
-contenedor**:
+  ```bash
+  docker compose pull                      # Descarga la última versión de la imagen
+  docker compose up -d --force-recreate    # Recrea el contenedor (re-sincroniza el contenido)
+  docker image prune -f                    # Limpia imágenes huérfanas
+  ```
+
+- **Desarrollo / build desde el código fuente (repo clonado):** se usa el `deploy.sh`
+  incluido, que además actualiza el "motor" y reconstruye la imagen localmente:
+
+  ```bash
+  git pull origin main             # Actualiza el "motor" (este proyecto)
+  docker compose up -d --build     # Reconstruye y recrea el contenedor
+  docker image prune -f            # Limpia imágenes huérfanas
+  ```
+
+En ambos casos, al recrearse el contenedor el `entrypoint.sh` vuelve a sincronizar y compilar
+el contenido, publicando así la última versión de la documentación.
+
+### Automatización al hacer commit en la documentación
+
+Para automatizar la publicación se debe añadir, **en el repositorio de la documentación**
+(no en este), un mecanismo que dispare el redespliegue cada vez que se haga un commit. La
+implementación concreta **depende de la plataforma donde esté desplegado el contenedor**:
 
 - **Servidor propio (VPS / on-premise):** un workflow de GitHub Actions (o GitLab CI, etc.)
   que se conecte por SSH y recree el contenedor.
@@ -94,7 +115,7 @@ contenedor**:
 - **Watchtower u orquestadores:** pueden exponer un endpoint HTTP para forzar el reinicio del
   servicio.
 
-### Ejemplo: GitHub Action por SSH (servidor propio)
+#### Ejemplo: GitHub Action por SSH (servidor propio)
 
 Crear el archivo `.github/workflows/redeploy-docs.yml` **en el repositorio de la
 documentación**:
@@ -119,22 +140,23 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /ruta/al/proyecto-documentacion
-            ./deploy.sh
+            cd /ruta/al/despliegue
+            ./redeploy.sh
 ```
 
 **Funcionamiento:**
 
 1. Cada `push` a la rama `main` del repositorio de documentación dispara el workflow.
 2. La acción se conecta por SSH al servidor donde corre el contenedor.
-3. Ejecuta el script `deploy.sh` del proyecto, que recrea el contenedor.
-4. Al recrearse, el `entrypoint.sh` vuelve a clonar `URL_REPO_DOCS`, sincroniza el contenido y
-   recompila el sitio, dejando publicada la última versión de la documentación.
+3. Ejecuta `redeploy.sh` (o `deploy.sh` si se despliega desde el código fuente), que recrea el
+   contenedor.
+4. Al recrearse, el `entrypoint.sh` vuelve a sincronizar `URL_REPO_DOCS`, recompila el sitio y
+   deja publicada la última versión de la documentación.
 
 > Los secretos (`DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`) se configuran en
 > *Settings → Secrets and variables → Actions* del repositorio de documentación.
 
-### Ejemplo: Deploy Hook por HTTP (PaaS)
+#### Ejemplo: Deploy Hook por HTTP (PaaS)
 
 Si la plataforma ofrece una URL de despliegue, el workflow se reduce a invocarla:
 
