@@ -7,6 +7,13 @@ services:
       - BRANCH_REPO_DOCS=${BRANCH_REPO_DOCS:-main}
       - PATH_REPO_DOCS=${PATH_REPO_DOCS:-}
       - SITE_TITLE=${SITE_TITLE:-Documentacion}
-    restart: "no"
+    restart: unless-stopped
     ports:
       - "${HOST_PORT:-8080}:8080"
+    volumes:
+      # Persiste el repo de contenido clonado entre recreaciones del contenedor:
+      # permite pull incremental y conserva la última versión si falla la red
+      - docs-content:/app/src/content/.docs_git
+
+volumes:
+  docs-content:

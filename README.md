@@ -42,7 +42,7 @@ necesidad de clonar este repositorio. Basta con un `docker-compose.yaml` que la 
 services:
   starlight-docs:
     image: rsvisu/fpvirtual-documentacion:latest
-    restart: no
+    restart: unless-stopped
     ports:
       - "80:8080"
     environment:
@@ -50,9 +50,23 @@ services:
       - BRANCH_REPO_DOCS=main
       - PATH_REPO_DOCS=src/docs
       - SITE_TITLE=Documentacion
+    volumes:
+      - docs-content:/app/src/content/.docs_git
+
+volumes:
+  docs-content:
 ```
 
 Todas las variables de entorno disponibles están definidas en `.env.example`
+
+> **`restart: unless-stopped`** asegura que el contenedor vuelva a levantarse solo tras un
+> reinicio del host o una caída, salvo que se haya parado manualmente.
+
+> **Volumen `docs-content`:** persiste el repositorio de contenido clonado
+> (`src/content/.docs_git`) entre recreaciones del contenedor. Así, cada redespliegue hace un
+> `git pull` **incremental** en lugar de un clonado completo, y —gracias a la degradación
+> elegante de `sync-docs.js`— si GitHub o la red fallan durante el arranque, el sitio se sigue
+> sirviendo con la **última versión sincronizada** en vez de quedar caído.
 
 > **Nota sobre los dos `docker-compose`:** El `docker-compose.yaml` incluido en este
 > repositorio es de **desarrollo**: usa `build: context: .` para construir la imagen

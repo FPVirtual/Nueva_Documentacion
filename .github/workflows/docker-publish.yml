@@ -29,4 +29,4 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:latest
-            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:latest-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/fpvirtual-documentacion:${{ github.sha }}
